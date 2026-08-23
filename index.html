@@ -239,7 +239,19 @@ function setMe(){
   const v=document.getElementById('gateSelect').value;
   if(!v){toast('Select your name',true);return;}
   me=v;localStorage.setItem(LS_ME,v);
+  recordActivation(v);
   showApp();
+}
+// Logs that this player has opened the app and picked their name.
+// Upsert on player_name: first pick creates the row, re-opens just bump last_seen.
+async function recordActivation(name){
+  try{
+    await fetch(SB_URL+"/rest/v1/player_activations?on_conflict=player_name",{
+      method:"POST",
+      headers:{...H,Prefer:"resolution=merge-duplicates,return=minimal"},
+      body:JSON.stringify({player_name:name,last_seen_at:new Date().toISOString(),user_agent:navigator.userAgent})
+    });
+  }catch(e){/* non-blocking: never stop a player entering the app over this */}
 }
 function switchMe(){
   localStorage.removeItem(LS_ME);me=null;
@@ -349,7 +361,7 @@ function playChime(){try{actx=actx||new(window.AudioContext||window.webkitAudioC
 
 loadSquad().then(()=>{
   const saved=localStorage.getItem(LS_ME);
-  if(saved){me=saved;showApp();loadMine();}
+  if(saved){me=saved;recordActivation(saved);showApp();loadMine();}
   initRealtime();
 });
 // crest injected below
