@@ -529,7 +529,7 @@ loadSquad().then(()=>{
   initRealtime();
 });
 
-if('serviceWorker' in navigator){var c="self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>{});";var b=new Blob([c],{type:'application/javascript'});navigator.serviceWorker.register(URL.createObjectURL(b)).catch(function(){});}
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});}).catch(function(){});if(window.caches&&caches.keys){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}).catch(function(){});}}
 </script>
 </body>
 </html>
